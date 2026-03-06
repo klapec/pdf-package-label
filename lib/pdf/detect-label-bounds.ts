@@ -1,5 +1,3 @@
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
-
 export type LabelBounds = {
   left: number;
   right: number;
@@ -16,17 +14,38 @@ type TextItem = {
   transform: number[];
 };
 
-GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/legacy/build/pdf.worker.mjs",
-  import.meta.url,
-).toString();
+let hasLoggedPdfJsWarning = false;
+
+async function loadPdfJs() {
+  try {
+    return await import("pdfjs-dist/legacy/build/pdf.mjs");
+  } catch (error) {
+    if (!hasLoggedPdfJsWarning) {
+      console.warn(
+        "PDF.js is unavailable in this runtime; falling back to quadrant-only label repositioning.",
+        error,
+      );
+      hasLoggedPdfJsWarning = true;
+    }
+
+    return null;
+  }
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export async function detectLabelBounds(pdfBytes: Uint8Array): Promise<LabelBounds | null> {
-  const document = await getDocument({
+export async function detectLabelBounds(
+  pdfBytes: Uint8Array,
+): Promise<LabelBounds | null> {
+  const pdfJs = await loadPdfJs();
+
+  if (!pdfJs) {
+    return null;
+  }
+
+  const document = await pdfJs.getDocument({
     data: pdfBytes.slice(),
     useWorkerFetch: false,
     isEvalSupported: false,

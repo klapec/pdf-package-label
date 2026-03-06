@@ -1,0 +1,10 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "git add": true,
+    "git commit": true,
+    "git push": true
+  },
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file"
+}

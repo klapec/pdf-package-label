@@ -8,6 +8,7 @@ Mobile-first Next.js 16 app for repositioning a single shipping label within a p
 - Node.js route handlers for Vercel
 - `pdf-lib` for output PDF generation
 - `pdfjs-dist` for text-based label bounds detection
+- `oxlint` + `oxfmt` for linting and formatting
 - Tailwind CSS v4 + shadcn/ui-style components
 
 ## Run

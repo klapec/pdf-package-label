@@ -79,7 +79,9 @@ export function UploadLabelForm() {
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (submissionError) {
       setStatus("error");
-      setError(submissionError instanceof Error ? submissionError.message : "Wystąpił nieoczekiwany błąd.");
+      setError(
+        submissionError instanceof Error ? submissionError.message : "Wystąpił nieoczekiwany błąd.",
+      );
     }
   }
 
@@ -93,10 +95,12 @@ export function UploadLabelForm() {
           <div className="space-y-2">
             <CardTitle>Przenieś etykietę do wybranego rogu kartki A4</CardTitle>
             <CardDescription>
-              Wgraj jednostronicowy plik PDF w formacie A4, wybierz docelowy róg i pobierz wynikowy plik PDF A4 gotowy do druku.
+              Wgraj jednostronicowy plik PDF w formacie A4, wybierz docelowy róg i pobierz wynikowy
+              plik PDF A4 gotowy do druku.
             </CardDescription>
             <p className="text-sm text-muted-foreground">
-              Dla drukarki Brother T510W lewy i prawy róg są kompensowane automatycznie, więc wybór odpowiada końcowemu położeniu na wydruku.
+              Dla drukarki Brother T510W lewy i prawy róg są kompensowane automatycznie, więc wybór
+              odpowiada końcowemu położeniu na wydruku.
             </p>
           </div>
         </CardHeader>
@@ -166,7 +170,8 @@ export function UploadLabelForm() {
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
             {status === "done" ? (
               <p className="text-sm text-emerald-700">
-                Plik PDF został wygenerowany. Przeglądarka powinna go teraz pobrać, a na telefonie otwarta karta pozwoli od razu wydrukować dokument.
+                Plik PDF został wygenerowany. Przeglądarka powinna go teraz pobrać, a na telefonie
+                otwarta karta pozwoli od razu wydrukować dokument.
               </p>
             ) : null}
 

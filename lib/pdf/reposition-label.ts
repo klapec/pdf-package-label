@@ -1,11 +1,6 @@
 import { degrees, PDFDocument } from "pdf-lib";
 
-import {
-  A4_HEIGHT,
-  A4_WIDTH,
-  type Corner,
-  QUADRANT_PADDING,
-} from "@/lib/pdf/constants";
+import { A4_HEIGHT, A4_WIDTH, type Corner, QUADRANT_PADDING } from "@/lib/pdf/constants";
 import { detectLabelBounds } from "@/lib/pdf/detect-label-bounds";
 
 type Placement = {
@@ -13,9 +8,7 @@ type Placement = {
   y: number;
 };
 
-async function normalizeLandscapePageToPortrait(
-  pdfBytes: Uint8Array,
-): Promise<Uint8Array> {
+async function normalizeLandscapePageToPortrait(pdfBytes: Uint8Array): Promise<Uint8Array> {
   const inputDocument = await PDFDocument.load(pdfBytes.slice());
   const inputPage = inputDocument.getPage(0);
   const { width, height } = inputPage.getSize();
@@ -39,17 +32,9 @@ async function normalizeLandscapePageToPortrait(
   return await portraitDocument.save();
 }
 
-function getQuadrantPlacement(
-  width: number,
-  height: number,
-  corner: Corner,
-): Placement {
-  const x = corner.endsWith("right")
-    ? A4_WIDTH - QUADRANT_PADDING - width
-    : QUADRANT_PADDING;
-  const y = corner.startsWith("top")
-    ? A4_HEIGHT - QUADRANT_PADDING - height
-    : QUADRANT_PADDING;
+function getQuadrantPlacement(width: number, height: number, corner: Corner): Placement {
+  const x = corner.endsWith("right") ? A4_WIDTH - QUADRANT_PADDING - width : QUADRANT_PADDING;
+  const y = corner.startsWith("top") ? A4_HEIGHT - QUADRANT_PADDING - height : QUADRANT_PADDING;
 
   return { x, y };
 }
@@ -96,20 +81,13 @@ export async function repositionLabel(pdfBytes: Uint8Array, corner: Corner) {
   const sourcePage = sourceDocument.getPage(0);
   const sourceSize = sourcePage.getSize();
   const detectedBounds = await detectLabelBounds(workingPdfBytes);
-  const bounds = getSourceQuadrantBounds(
-    sourceSize.width,
-    sourceSize.height,
-    detectedBounds,
-  );
+  const bounds = getSourceQuadrantBounds(sourceSize.width, sourceSize.height, detectedBounds);
 
   const embeddedDocument = await PDFDocument.load(workingPdfBytes.slice());
   const outputDocument = await PDFDocument.create();
   const outputPage = outputDocument.addPage([A4_WIDTH, A4_HEIGHT]);
 
-  const embeddedPage = await outputDocument.embedPage(
-    embeddedDocument.getPage(0),
-    bounds,
-  );
+  const embeddedPage = await outputDocument.embedPage(embeddedDocument.getPage(0), bounds);
 
   const placement = getQuadrantPlacement(
     bounds.right - bounds.left,

@@ -4,11 +4,22 @@ import { useMemo, useRef, useState } from "react";
 import { LoaderCircle, MapPinned, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CORNERS, type Corner } from "@/lib/pdf/constants";
+import {
+  CORNERS,
+  type Corner,
+  mirrorCornerHorizontally,
+} from "@/lib/pdf/constants";
+import { repositionLabelInBrowser } from "@/lib/pdf/reposition-label-browser";
 import { cn } from "@/lib/utils";
 
 const cornerLabels: Record<Corner, string> = {
@@ -22,7 +33,9 @@ export function UploadLabelForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [corner, setCorner] = useState<Corner>("top-left");
-  const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "done" | "error"
+  >("idle");
   const [error, setError] = useState<string | null>(null);
 
   const fileSummary = useMemo(() => {
@@ -46,22 +59,16 @@ export function UploadLabelForm() {
     setStatus("submitting");
     setError(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("corner", corner);
-
     try {
-      const response = await fetch("/api/reposition", {
-        method: "POST",
-        body: formData,
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const result = await repositionLabelInBrowser(
+        bytes,
+        mirrorCornerHorizontally(corner),
+      );
+      const outputBytes = new Uint8Array(result.bytes);
+      const blob = new Blob([outputBytes], {
+        type: "application/pdf",
       });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? "Serwer nie mógł wygenerować pliku PDF.");
-      }
-
-      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -80,7 +87,9 @@ export function UploadLabelForm() {
     } catch (submissionError) {
       setStatus("error");
       setError(
-        submissionError instanceof Error ? submissionError.message : "Wystąpił nieoczekiwany błąd.",
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Wystąpił nieoczekiwany błąd.",
       );
     }
   }
@@ -95,12 +104,13 @@ export function UploadLabelForm() {
           <div className="space-y-2">
             <CardTitle>Przenieś etykietę do wybranego rogu kartki A4</CardTitle>
             <CardDescription>
-              Wgraj jednostronicowy plik PDF w formacie A4, wybierz docelowy róg i pobierz wynikowy
-              plik PDF A4 gotowy do druku.
+              Wgraj jednostronicowy plik PDF w formacie A4, wybierz docelowy róg
+              i pobierz wynikowy plik PDF A4 gotowy do druku.
             </CardDescription>
             <p className="text-sm text-muted-foreground">
-              Dla drukarki Brother T510W lewy i prawy róg są kompensowane automatycznie, więc wybór
-              odpowiada końcowemu położeniu na wydruku.
+              Dla drukarki Brother T510W lewy i prawy róg są kompensowane
+              automatycznie, więc wybór odpowiada końcowemu położeniu na
+              wydruku.
             </p>
           </div>
         </CardHeader>
@@ -145,7 +155,9 @@ export function UploadLabelForm() {
                       )}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{cornerLabels[item]}</span>
+                        <span className="text-sm font-medium">
+                          {cornerLabels[item]}
+                        </span>
                         <RadioGroupItem id={item} value={item} />
                       </div>
                       <div className="flex justify-center rounded-xl border border-dashed border-border/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(219,234,254,0.45))] p-2">
@@ -155,7 +167,8 @@ export function UploadLabelForm() {
                               key={previewCorner}
                               className={cn(
                                 "rounded-md border border-border/60 bg-white/75",
-                                previewCorner === item && "bg-accent ring-2 ring-primary/60",
+                                previewCorner === item &&
+                                  "bg-accent ring-2 ring-primary/60",
                               )}
                             />
                           ))}
@@ -170,8 +183,9 @@ export function UploadLabelForm() {
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
             {status === "done" ? (
               <p className="text-sm text-emerald-700">
-                Plik PDF został wygenerowany. Przeglądarka powinna go teraz pobrać, a na telefonie
-                otwarta karta pozwoli od razu wydrukować dokument.
+                Plik PDF został wygenerowany. Przeglądarka powinna go teraz
+                pobrać, a na telefonie otwarta karta pozwoli od razu wydrukować
+                dokument.
               </p>
             ) : null}
 

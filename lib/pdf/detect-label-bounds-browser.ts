@@ -42,8 +42,7 @@ function getBrowserCapabilityReport() {
     userAgent: window.navigator.userAgent,
     hasPromiseWithResolvers: typeof promiseValue.withResolvers === "function",
     hasPromiseTry: typeof promiseValue.try === "function",
-    hasMapGetOrInsertComputed:
-      typeof mapProto.getOrInsertComputed === "function",
+    hasMapGetOrInsertComputed: typeof mapProto.getOrInsertComputed === "function",
     hasURLParse: typeof urlCtor.parse === "function",
   };
 }
@@ -54,10 +53,7 @@ function logBrowserEnvironmentOnce() {
   }
 
   hasLoggedBrowserEnvironment = true;
-  console.info(
-    "[pdf/reposition][browser] Environment",
-    getBrowserCapabilityReport(),
-  );
+  console.info("[pdf/reposition][browser] Environment", getBrowserCapabilityReport());
 }
 
 function ensurePromiseWithResolversPolyfill() {
@@ -71,9 +67,7 @@ function ensurePromiseWithResolversPolyfill() {
     return;
   }
 
-  console.info(
-    "[pdf/reposition][browser] Applying Promise.withResolvers polyfill",
-  );
+  console.info("[pdf/reposition][browser] Applying Promise.withResolvers polyfill");
 
   (
     Promise as PromiseConstructor & {
@@ -196,8 +190,7 @@ async function readTextItemsFromStream(page: {
 export async function detectLabelBoundsInBrowser(
   pdfBytes: Uint8Array,
 ): Promise<LabelBounds | null> {
-  const startTime =
-    typeof performance !== "undefined" ? performance.now() : Date.now();
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
   console.info("[pdf/reposition][browser] detectLabelBounds start", {
     bytes: pdfBytes.byteLength,
   });
@@ -211,9 +204,7 @@ export async function detectLabelBoundsInBrowser(
     return null;
   }
 
-  let document: Awaited<
-    ReturnType<(typeof pdfJs)["getDocument"]>["promise"]
-  > | null = null;
+  let document: Awaited<ReturnType<(typeof pdfJs)["getDocument"]>["promise"]> | null = null;
 
   try {
     const loadingTask = pdfJs.getDocument({
@@ -286,16 +277,12 @@ export async function detectLabelBoundsInBrowser(
       try {
         await document.destroy();
       } catch (destroyError) {
-        console.warn(
-          "[pdf/reposition][browser] Failed to destroy PDF.js document",
-          destroyError,
-        );
+        console.warn("[pdf/reposition][browser] Failed to destroy PDF.js document", destroyError);
       }
     }
 
     const elapsed =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) -
-      startTime;
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
     console.info("[pdf/reposition][browser] detectLabelBounds end", {
       elapsedMs: Math.round(elapsed),
     });

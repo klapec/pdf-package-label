@@ -36,9 +36,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export async function detectLabelBounds(
-  pdfBytes: Uint8Array,
-): Promise<LabelBounds | null> {
+export async function detectLabelBounds(pdfBytes: Uint8Array): Promise<LabelBounds | null> {
   const pdfJs = await loadPdfJs();
 
   if (!pdfJs) {

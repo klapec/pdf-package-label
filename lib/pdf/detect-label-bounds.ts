@@ -18,11 +18,11 @@ let hasLoggedPdfJsWarning = false;
 
 async function loadPdfJs() {
   try {
-    return await import("pdfjs-dist/legacy/build/pdf.mjs");
+    return await import('pdfjs-dist/legacy/build/pdf.mjs');
   } catch (error) {
     if (!hasLoggedPdfJsWarning) {
       console.warn(
-        "PDF.js is unavailable in this runtime; falling back to quadrant-only label repositioning.",
+        'PDF.js is unavailable in this runtime; falling back to quadrant-only label repositioning.',
         error,
       );
       hasLoggedPdfJsWarning = true;
@@ -36,7 +36,9 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export async function detectLabelBounds(pdfBytes: Uint8Array): Promise<LabelBounds | null> {
+export async function detectLabelBounds(
+  pdfBytes: Uint8Array,
+): Promise<LabelBounds | null> {
   const pdfJs = await loadPdfJs();
 
   if (!pdfJs) {

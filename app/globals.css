@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme inline {
-  --font-sans: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", "SF Mono", "Menlo", monospace;
+  --font-sans: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', 'SF Mono', 'Menlo', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -50,7 +50,11 @@
 body {
   @apply bg-background text-foreground min-h-screen antialiased;
   background-image:
-    radial-gradient(circle at top, oklch(0.92 0.05 170 / 0.35), transparent 32%),
+    radial-gradient(
+      circle at top,
+      oklch(0.92 0.05 170 / 0.35),
+      transparent 32%
+    ),
     linear-gradient(180deg, oklch(0.985 0.015 95), oklch(0.955 0.02 90));
 }
 

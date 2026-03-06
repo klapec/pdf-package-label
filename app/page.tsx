@@ -1,4 +1,4 @@
-import { UploadLabelForm } from "@/components/upload-label-form";
+import { UploadLabelForm } from '@/components/upload-label-form';
 
 export default function Home() {
   return (

@@ -1,4 +1,4 @@
-import type { LabelBounds } from "@/lib/pdf/detect-label-bounds";
+import type { LabelBounds } from '@/lib/pdf/detect-label-bounds';
 
 type TextItem = {
   str: string;
@@ -11,7 +11,7 @@ type TextContentChunk = {
   items?: unknown[];
 };
 
-type PdfJsModule = typeof import("pdfjs-dist/build/pdf.mjs");
+type PdfJsModule = typeof import('pdfjs-dist/build/pdf.mjs');
 type PromiseWithResolversResult<T> = {
   promise: Promise<T>;
   resolve: (value: T | PromiseLike<T>) => void;
@@ -23,7 +23,7 @@ let pdfJsPromise: Promise<PdfJsModule | null> | null = null;
 let hasLoggedBrowserEnvironment = false;
 
 function getBrowserCapabilityReport() {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return null;
   }
 
@@ -40,20 +40,24 @@ function getBrowserCapabilityReport() {
 
   return {
     userAgent: window.navigator.userAgent,
-    hasPromiseWithResolvers: typeof promiseValue.withResolvers === "function",
-    hasPromiseTry: typeof promiseValue.try === "function",
-    hasMapGetOrInsertComputed: typeof mapProto.getOrInsertComputed === "function",
-    hasURLParse: typeof urlCtor.parse === "function",
+    hasPromiseWithResolvers: typeof promiseValue.withResolvers === 'function',
+    hasPromiseTry: typeof promiseValue.try === 'function',
+    hasMapGetOrInsertComputed:
+      typeof mapProto.getOrInsertComputed === 'function',
+    hasURLParse: typeof urlCtor.parse === 'function',
   };
 }
 
 function logBrowserEnvironmentOnce() {
-  if (hasLoggedBrowserEnvironment || typeof window === "undefined") {
+  if (hasLoggedBrowserEnvironment || typeof window === 'undefined') {
     return;
   }
 
   hasLoggedBrowserEnvironment = true;
-  console.info("[pdf/reposition][browser] Environment", getBrowserCapabilityReport());
+  console.info(
+    '[pdf/reposition][browser] Environment',
+    getBrowserCapabilityReport(),
+  );
 }
 
 function ensurePromiseWithResolversPolyfill() {
@@ -63,11 +67,13 @@ function ensurePromiseWithResolversPolyfill() {
     }
   ).withResolvers;
 
-  if (typeof promiseWithResolvers === "function") {
+  if (typeof promiseWithResolvers === 'function') {
     return;
   }
 
-  console.info("[pdf/reposition][browser] Applying Promise.withResolvers polyfill");
+  console.info(
+    '[pdf/reposition][browser] Applying Promise.withResolvers polyfill',
+  );
 
   (
     Promise as PromiseConstructor & {
@@ -87,7 +93,7 @@ function ensurePromiseWithResolversPolyfill() {
 }
 
 async function loadPdfJsInBrowser(): Promise<PdfJsModule | null> {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return null;
   }
 
@@ -98,28 +104,28 @@ async function loadPdfJsInBrowser(): Promise<PdfJsModule | null> {
       try {
         ensurePromiseWithResolversPolyfill();
 
-        console.info("[pdf/reposition][browser] Loading pdfjs-dist module");
+        console.info('[pdf/reposition][browser] Loading pdfjs-dist module');
 
-        const pdfJs = await import("pdfjs-dist/build/pdf.mjs");
+        const pdfJs = await import('pdfjs-dist/build/pdf.mjs');
         pdfJs.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
+          'pdfjs-dist/build/pdf.worker.min.mjs',
           import.meta.url,
         ).toString();
         const maybeVersion = (pdfJs as { version?: string }).version;
-        console.info("[pdf/reposition][browser] PDF.js loaded", {
-          version: maybeVersion ?? "unknown",
+        console.info('[pdf/reposition][browser] PDF.js loaded', {
+          version: maybeVersion ?? 'unknown',
           workerSrc: pdfJs.GlobalWorkerOptions.workerSrc,
-          workerMode: "disabled",
+          workerMode: 'disabled',
         });
         return pdfJs;
       } catch (error) {
         if (!hasLoggedPdfJsWarning) {
-          console.error("[pdf/reposition][browser] PDF.js init failed", {
+          console.error('[pdf/reposition][browser] PDF.js init failed', {
             error,
             capabilities: getBrowserCapabilityReport(),
           });
           console.warn(
-            "Browser PDF.js could not be initialized; falling back to quadrant-only label repositioning.",
+            'Browser PDF.js could not be initialized; falling back to quadrant-only label repositioning.',
           );
           hasLoggedPdfJsWarning = true;
         }
@@ -143,15 +149,15 @@ async function readTextItemsFromStream(page: {
   }) => ReadableStream<TextContentChunk>;
   getTextContent: () => Promise<{ items: unknown[] }>;
 }) {
-  if (typeof page.streamTextContent !== "function") {
+  if (typeof page.streamTextContent !== 'function') {
     console.warn(
-      "[pdf/reposition][browser] streamTextContent is unavailable, falling back to getTextContent",
+      '[pdf/reposition][browser] streamTextContent is unavailable, falling back to getTextContent',
     );
     const textContent = await page.getTextContent();
     return {
       items: textContent.items as TextItem[],
       chunkCount: 1,
-      method: "getTextContent",
+      method: 'getTextContent',
     } as const;
   }
 
@@ -180,7 +186,7 @@ async function readTextItemsFromStream(page: {
     return {
       items,
       chunkCount,
-      method: "streamTextContent",
+      method: 'streamTextContent',
     } as const;
   } finally {
     reader.releaseLock();
@@ -190,8 +196,9 @@ async function readTextItemsFromStream(page: {
 export async function detectLabelBoundsInBrowser(
   pdfBytes: Uint8Array,
 ): Promise<LabelBounds | null> {
-  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
-  console.info("[pdf/reposition][browser] detectLabelBounds start", {
+  const startTime =
+    typeof performance !== 'undefined' ? performance.now() : Date.now();
+  console.info('[pdf/reposition][browser] detectLabelBounds start', {
     bytes: pdfBytes.byteLength,
   });
 
@@ -199,12 +206,14 @@ export async function detectLabelBoundsInBrowser(
 
   if (!pdfJs) {
     console.warn(
-      "[pdf/reposition][browser] detectLabelBounds skipped because PDF.js is unavailable",
+      '[pdf/reposition][browser] detectLabelBounds skipped because PDF.js is unavailable',
     );
     return null;
   }
 
-  let document: Awaited<ReturnType<(typeof pdfJs)["getDocument"]>["promise"]> | null = null;
+  let document: Awaited<
+    ReturnType<(typeof pdfJs)['getDocument']>['promise']
+  > | null = null;
 
   try {
     const loadingTask = pdfJs.getDocument({
@@ -223,7 +232,7 @@ export async function detectLabelBoundsInBrowser(
     const items = textReadResult.items;
     const meaningfulItems = items.filter((item) => item.str.trim().length > 0);
 
-    console.info("[pdf/reposition][browser] Text extraction stats", {
+    console.info('[pdf/reposition][browser] Text extraction stats', {
       method: textReadResult.method,
       chunkCount: textReadResult.chunkCount,
       pageWidth: viewport.width,
@@ -233,7 +242,7 @@ export async function detectLabelBoundsInBrowser(
     });
 
     if (meaningfulItems.length === 0) {
-      console.warn("[pdf/reposition][browser] No meaningful text items found");
+      console.warn('[pdf/reposition][browser] No meaningful text items found');
       return null;
     }
 
@@ -264,10 +273,10 @@ export async function detectLabelBoundsInBrowser(
       pageHeight: viewport.height,
     };
 
-    console.info("[pdf/reposition][browser] Bounds detected", bounds);
+    console.info('[pdf/reposition][browser] Bounds detected', bounds);
     return bounds;
   } catch (error) {
-    console.error("[pdf/reposition][browser] detectLabelBounds failed", {
+    console.error('[pdf/reposition][browser] detectLabelBounds failed', {
       error,
       capabilities: getBrowserCapabilityReport(),
     });
@@ -277,13 +286,17 @@ export async function detectLabelBoundsInBrowser(
       try {
         await document.destroy();
       } catch (destroyError) {
-        console.warn("[pdf/reposition][browser] Failed to destroy PDF.js document", destroyError);
+        console.warn(
+          '[pdf/reposition][browser] Failed to destroy PDF.js document',
+          destroyError,
+        );
       }
     }
 
     const elapsed =
-      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
-    console.info("[pdf/reposition][browser] detectLabelBounds end", {
+      (typeof performance !== 'undefined' ? performance.now() : Date.now()) -
+      startTime;
+    console.info('[pdf/reposition][browser] detectLabelBounds end', {
       elapsedMs: Math.round(elapsed),
     });
   }

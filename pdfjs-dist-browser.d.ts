@@ -1,4 +1,4 @@
-declare module "pdfjs-dist/build/pdf.mjs" {
+declare module 'pdfjs-dist/build/pdf.mjs' {
   export const GlobalWorkerOptions: {
     workerSrc: string;
   };

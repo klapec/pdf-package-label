@@ -5,6 +5,7 @@ declare module "pdfjs-dist/build/pdf.mjs" {
 
   export function getDocument(source: {
     data: Uint8Array;
+    disableWorker?: boolean;
     useWorkerFetch?: boolean;
     isEvalSupported?: boolean;
     disableFontFace?: boolean;
@@ -17,6 +18,14 @@ declare module "pdfjs-dist/build/pdf.mjs" {
           height: number;
         };
         getTextContent(): Promise<{ items: unknown[] }>;
+        streamTextContent(params?: {
+          includeMarkedContent?: boolean;
+          disableNormalization?: boolean;
+        }): ReadableStream<{
+          items: unknown[];
+          styles?: Record<string, unknown>;
+          lang?: string | null;
+        }>;
       }>;
       destroy(): Promise<void>;
     }>;

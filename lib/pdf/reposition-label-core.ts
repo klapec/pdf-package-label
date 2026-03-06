@@ -97,7 +97,16 @@ export async function repositionLabelWithDetector(
   corner: Corner,
   detectBounds: BoundsDetector,
 ) {
+  console.info("[pdf/reposition][core] Pipeline start", {
+    inputBytes: pdfBytes.byteLength,
+    corner,
+  });
+
   const workingPdfBytes = await normalizeLandscapePageToPortrait(pdfBytes);
+  console.info("[pdf/reposition][core] Orientation normalized", {
+    inputBytes: pdfBytes.byteLength,
+    normalizedBytes: workingPdfBytes.byteLength,
+  });
 
   const sourceDocument = await PDFDocument.load(workingPdfBytes.slice());
   const sourcePage = sourceDocument.getPage(0);
@@ -108,6 +117,12 @@ export async function repositionLabelWithDetector(
     sourceSize.height,
     detectedBounds,
   );
+  console.info("[pdf/reposition][core] Source bounds selected", {
+    pageWidth: sourceSize.width,
+    pageHeight: sourceSize.height,
+    detectedBounds,
+    selectedBounds: bounds,
+  });
 
   const embeddedDocument = await PDFDocument.load(workingPdfBytes.slice());
   const outputDocument = await PDFDocument.create();
@@ -130,8 +145,14 @@ export async function repositionLabelWithDetector(
     height: bounds.top - bounds.bottom,
   });
 
+  const outputBytes = await outputDocument.save();
+  console.info("[pdf/reposition][core] Pipeline end", {
+    outputBytes: outputBytes.byteLength,
+    placement,
+  });
+
   return {
-    bytes: await outputDocument.save(),
+    bytes: outputBytes,
     bounds,
   };
 }

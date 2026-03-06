@@ -6,9 +6,27 @@ export async function repositionLabelInBrowser(
   pdfBytes: Uint8Array,
   corner: Corner,
 ) {
-  return repositionLabelWithDetector(
-    pdfBytes,
+  console.info("[pdf/reposition][browser] repositionLabelInBrowser start", {
+    bytes: pdfBytes.byteLength,
     corner,
-    detectLabelBoundsInBrowser,
-  );
+  });
+
+  try {
+    const result = await repositionLabelWithDetector(
+      pdfBytes,
+      corner,
+      detectLabelBoundsInBrowser,
+    );
+    console.info("[pdf/reposition][browser] repositionLabelInBrowser end", {
+      outputBytes: result.bytes.byteLength,
+      bounds: result.bounds,
+    });
+    return result;
+  } catch (error) {
+    console.error(
+      "[pdf/reposition][browser] repositionLabelInBrowser failed",
+      error,
+    );
+    throw error;
+  }
 }

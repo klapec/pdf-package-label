@@ -29,6 +29,21 @@ const cornerLabels: Record<Corner, string> = {
   "bottom-right": "Prawy dolny",
 };
 
+function serializeError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+}
+
 export function UploadLabelForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -59,12 +74,32 @@ export function UploadLabelForm() {
     setStatus("submitting");
     setError(null);
 
+    const startTime =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    console.info("[pdf/reposition][ui] Submit started", {
+      fileName: file.name,
+      fileSize: file.size,
+      requestedCorner: corner,
+      mirroredCorner: mirrorCornerHorizontally(corner),
+      userAgent:
+        typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+    });
+
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
+      console.info("[pdf/reposition][ui] File loaded into memory", {
+        bytes: bytes.byteLength,
+      });
+
       const result = await repositionLabelInBrowser(
         bytes,
         mirrorCornerHorizontally(corner),
       );
+      console.info("[pdf/reposition][ui] PDF reposition complete", {
+        outputBytes: result.bytes.byteLength,
+        bounds: result.bounds,
+      });
+
       const outputBytes = new Uint8Array(result.bytes);
       const blob = new Blob([outputBytes], {
         type: "application/pdf",
@@ -84,12 +119,23 @@ export function UploadLabelForm() {
       }
       setStatus("done");
       window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+
+      const elapsed =
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+        startTime;
+      console.info("[pdf/reposition][ui] Submit finished", {
+        elapsedMs: Math.round(elapsed),
+      });
     } catch (submissionError) {
       setStatus("error");
       setError(
         submissionError instanceof Error
           ? submissionError.message
           : "Wystąpił nieoczekiwany błąd.",
+      );
+      console.error(
+        "[pdf/reposition][ui] Submit failed",
+        serializeError(submissionError),
       );
     }
   }

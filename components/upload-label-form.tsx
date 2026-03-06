@@ -153,11 +153,6 @@ export function UploadLabelForm() {
               Wgraj jednostronicowy plik PDF w formacie A4, wybierz docelowy róg
               i pobierz wynikowy plik PDF A4 gotowy do druku.
             </CardDescription>
-            <p className="text-muted-foreground text-sm">
-              Dla drukarki Brother T510W lewy i prawy róg są kompensowane
-              automatycznie, więc wybór odpowiada końcowemu położeniu na
-              wydruku.
-            </p>
           </div>
         </CardHeader>
         <CardContent>
@@ -207,7 +202,7 @@ export function UploadLabelForm() {
                         <RadioGroupItem id={item} value={item} />
                       </div>
                       <div className="border-border/80 flex justify-center rounded-xl border border-dashed bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(219,234,254,0.45))] p-2">
-                        <div className="grid aspect-[1/1.414] w-full max-w-[11rem] grid-cols-2 grid-rows-2 gap-2">
+                        <div className="grid aspect-[1/1.414] w-full max-w-44 grid-cols-2 grid-rows-2 gap-2">
                           {CORNERS.map((previewCorner) => (
                             <div
                               key={previewCorner}
